@@ -3,7 +3,9 @@ import { Image } from "expo-image";
 import ImageViewer from "@/components/imageViewer";
 import { Ionicons } from '@expo/vector-icons'
 import { colors } from "@/utils/theme";
+import { useRouter } from "expo-router";
 
+const router = useRouter();
 const PlaceholderImage = require("../../assets/images/background-image.jpg")
 
 export default function Index() {
@@ -52,7 +54,7 @@ export default function Index() {
           </View>
 
           {/* CTA Button */}
-          <TouchableOpacity className="mt-4 bg-kiku-light-green px-4 py-2 rounded-full self-start">
+          <TouchableOpacity  onPress={() => router.push("/explore")} className="mt-4 bg-kiku-light-green px-4 py-2 rounded-full self-start">
             <Text className="text-white font-semibold">Explore Now</Text>
           </TouchableOpacity>
         </View>
@@ -78,7 +80,9 @@ export default function Index() {
                 <Ionicons name="trending-up-outline" size={14} color={colors.kikuLightGreen}/>
                 <Text className="ml-1 text-sm text-gray-700">Milestone Progress 90%</Text>
               </View>
-              <Text className="text-xs text-kiku-muted-green font-medium mt-1">Jump back in</Text>
+              <TouchableOpacity onPress={() => router.push("/project/1")}>
+                <Text className="text-xs text-kiku-muted-green font-medium mt-1">Jump back in</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
@@ -93,7 +97,7 @@ export default function Index() {
       <View className="mt-4 overflow-visible">
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {/* Project Card 1 */}
-          <View className="w-48 ml-2 mr-4 mb-2 bg-white rounded-xl shadow-md overflow-hidden">
+          <TouchableOpacity onPress={() => router.push("/project/1")} className="w-48 ml-2 mr-4 mb-2 bg-white rounded-xl shadow-md overflow-hidden">
             <Image
               source={{ uri: 'https://images.unsplash.com/photo-1699720435972-421b63a6ee57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwyfHxsYXRyaW5lfGVufDB8fHx8MTcyMTc0MjUxMnww&ixlib=rb-4.0.3&q=80&w=1080' }}
               className="w-full h-28"
@@ -107,10 +111,10 @@ export default function Index() {
               </View>
               <Text className="text-xs text-kiku-muted-green font-medium mt-1">View</Text>
             </View>
-          </View>
+          </TouchableOpacity>
 
           {/* Project Card 2 */}
-          <View className="w-48 mr-4 mb-2 bg-white rounded-xl shadow-md overflow-hidden">
+          <TouchableOpacity onPress={() => router.push("/project/1")}className="w-48 mr-4 mb-2 bg-white rounded-xl shadow-md overflow-hidden">
             <Image
               source={{ uri: 'https://images.unsplash.com/photo-1697383904769-9a0342912c68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwzfHxzbHVtc3xlbnwwfHx8fDE3MjE3NDI4NTh8MA&ixlib=rb-4.0.3&q=80&w=1080' }}
               className="w-full h-28"
@@ -124,7 +128,7 @@ export default function Index() {
               </View>
               <Text className="text-xs text-kiku-muted-green font-medium mt-1">View</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         </ScrollView>
       </View>
 
@@ -135,7 +139,9 @@ export default function Index() {
         </Text>
 
         {/* Article Card 1 */}
-        <View className="bg-white rounded-xl shadow-md mb-4 p-4">
+        <TouchableOpacity 
+          className="bg-white rounded-xl shadow-md mb-4 p-4"
+          onPress={() => router.push(`/article/1`)}>
           <Image
             source={{ uri: 'https://images.unsplash.com/photo-1518219051733-d8d4fbbf9797?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw2fHx2aWxsYWdlfGVufDB8fHx8MTcyMTc0Mjg3OXww&ixlib=rb-4.0.3&q=80&w=1080' }}
             className="w-full h-36 rounded-lg mb-3"
@@ -147,10 +153,12 @@ export default function Index() {
           <Text className="text-sm text-gray-600">
             Learn how to develop your village home - "shags" - and give back to the culture and community that brought you all the way here.
           </Text>
-        </View>
+        </TouchableOpacity>
 
         {/* Article Card 2 */}
-        <View className="bg-white rounded-xl shadow-md mb-4 p-4">
+        <TouchableOpacity 
+          className="bg-white rounded-xl shadow-md mb-4 p-4"
+          onPress={() => router.push(`/article/1`)}>
           <Image
             source={{ uri: 'https://images.unsplash.com/photo-1532619675605-1ede6c2ed2b0?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }}
             className="w-full h-36 rounded-lg mb-3"
@@ -162,7 +170,7 @@ export default function Index() {
           <Text className="text-sm text-gray-600">
             Working on a proposal for a new passion project in a developing area? Here are the best tips to get your project funded.
           </Text>
-        </View>
+        </TouchableOpacity>
       </View>
 
     </ScrollView>

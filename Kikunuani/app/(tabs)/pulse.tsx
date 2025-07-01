@@ -1,5 +1,8 @@
 import { View, Text, TextInput, ScrollView, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+
+const router = useRouter();
 
 export default function PulseScreen() {
   return (
@@ -34,9 +37,9 @@ export default function PulseScreen() {
       {/* Horizontal Article Cards */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
         {[1, 2].map((_, idx) => (
-          <View
+          <TouchableOpacity onPress={() => router.push("/article/1")}
             key={idx}
-            className="w-60 mr-4 bg-white border border-emerald-200 rounded-xl overflow-hidden shadow-md my-4"
+            className="w-60 mr-4 bg-white border border-kiku-light-green rounded-xl overflow-hidden shadow-md my-4"
           >
             <View className="relative">
               <Image
@@ -62,7 +65,7 @@ export default function PulseScreen() {
                 <Text className="text-xs text-gray-500">12h</Text>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
 
@@ -73,7 +76,7 @@ export default function PulseScreen() {
             key={pill}
             className={`px-4 py-2 mr-2 rounded-full ${
               i === 0
-                ? 'bg-emerald-700'
+                ? 'bg-kiku-light-green'
                 : 'bg-gray-100'
             }`}
           >
@@ -92,7 +95,7 @@ export default function PulseScreen() {
       <Text className="text-base font-semibold text-gray-800 mb-4">Popular Today</Text>
 
       {[1, 2].map((_, idx) => (
-        <View
+        <TouchableOpacity onPress={() => router.push("/article/1")}
           key={idx}
           className="flex-row bg-white mb-4 rounded-xl shadow-md overflow-hidden"
         >
@@ -114,9 +117,9 @@ export default function PulseScreen() {
               <Ionicons name="time-outline" size={12} color="#9CA3AF" />
               <Text className="text-xs text-gray-500">12h</Text>
             </View>
-            <Text className="text-xs text-emerald-600 font-semibold mt-1">Read Now</Text>
+            <Text className="text-xs text-kiku-dark-green font-semibold mt-1">Read Now</Text>
           </View>
-        </View>
+        </TouchableOpacity>
       ))}
     </ScrollView>
   );

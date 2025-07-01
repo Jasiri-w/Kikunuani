@@ -3,11 +3,13 @@ import { StatusBar } from "expo-status-bar";
 import { LogBox } from "react-native";
 import "../global.css";
 
+import { AuthProvider } from "@/contexts/AuthContext";
+
 LogBox.ignoreAllLogs(true);
 
 export default function RootLayout() {
   return (
-    <>
+    <AuthProvider>
       <StatusBar style="light" />
       <Stack>
         <Stack.Screen 
@@ -23,6 +25,6 @@ export default function RootLayout() {
           }} 
         />
       </Stack>
-    </>
+    </AuthProvider>
   );
 }

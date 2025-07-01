@@ -50,13 +50,13 @@ export default function ExploreScreen() {
                 key={index}
                 className={`px-4 py-2 rounded-full border ${
                   index === 0
-                    ? "bg-emerald-100 border-emerald-400"
+                    ? "bg-emerald-100 border-kiku-light-green"
                     : "bg-gray-100 border-gray-300"
                 }`}
               >
                 <Text
                   className={`text-sm font-medium ${
-                    index === 0 ? "text-emerald-700" : "text-gray-600"
+                    index === 0 ? "text-kiku-dark-green" : "text-gray-600"
                   }`}
                 >
                   {label}
@@ -98,11 +98,11 @@ export default function ExploreScreen() {
         </View>
 
         {/* Highlight Card */}
-        <View className="flex-row bg-emerald-100 border border-emerald-400 rounded-xl overflow-hidden mb-6">
+        <View className="flex-row bg-emerald-100 border border-kiku-light-green rounded-xl overflow-hidden mb-6">
           <View className="flex-1 p-4 justify-center">
-            <Text className="text-xs text-emerald-600 font-semibold mb-1">Top Regions</Text>
+            <Text className="text-xs text-kiku-muted-green font-semibold mb-1">Top Regions</Text>
             <Text className="text-lg font-bold text-emerald-800">South America</Text>
-            <Text className="text-sm text-emerald-700 mt-1">
+            <Text className="text-sm text-kiku-dark-green mt-1">
               This region is known for its high altitude growing, fruitful environment and robust farms.
             </Text>
           </View>
