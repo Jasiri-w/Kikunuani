@@ -7,7 +7,7 @@ A mobile-first platform empowering youth and diaspora to discover and contribute
 
 ## 🚀 Live Preview
 
-- **Beta Build (Expo Web):** [kikunuani--nfj0prs33r.expo.app](https://kikunuani--nfj0prs33r.expo.app/)
+- **Beta Build (Expo Web):** [https://kikunuani--beta.expo.app/](https://kikunuani--beta.expo.app/)
 - **Landing Page:** [jasiriw.wixsite.com/kikunuani](https://jasiriw.wixsite.com/kikunuani)
 
 ---
