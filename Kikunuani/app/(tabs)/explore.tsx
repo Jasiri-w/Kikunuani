@@ -32,42 +32,6 @@ export default function ExploreScreen() {
 
       {/* Main Content */}
       <View className="px-4 pt-6 pb-12">
-        {/* 🔍 Search Bar */}
-        <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-2 mb-4">
-          <Ionicons name="search" size={18} color="#6B7280" />
-          <TextInput
-            placeholder="Search..."
-            className="ml-2 flex-1 text-sm text-gray-700"
-            placeholderTextColor="#9CA3AF"
-          />
-        </View>
-
-        {/* Filter Pills */}
-        <View className="flex-row flex-wrap mb-4 gap-2">
-          {["In your area", "In your country", "For you"].map(
-            (label, index) => (
-              <TouchableOpacity
-                key={index}
-                className={`px-4 py-2 rounded-full border ${
-                  index === 0
-                    ? "bg-emerald-100 border-kiku-light-green"
-                    : "bg-gray-100 border-gray-300"
-                }`}
-                onPress={() => {
-                  Alert.alert("Filter Selected", `You selected: ${label}`, [{text: 'Cancel',onPress: () => console.log('Cancel Pressed'),style: 'cancel'}]);
-                }}
-              >
-                <Text
-                  className={`text-sm font-medium ${
-                    index === 0 ? "text-kiku-dark-green" : "text-gray-600"
-                  }`}
-                >
-                  {label}
-                </Text>
-              </TouchableOpacity>
-            )
-          )}
-        </View>
 
         {/* Image Cards */}
         <View className="flex-row justify-between mb-4">
@@ -120,6 +84,46 @@ export default function ExploreScreen() {
 
         {/* Follow-up Section Title */}
         <Text className="text-gray-700 font-medium text-base">Projects</Text>
+        <Text className="text-gray-500 text-xs mb-4">
+          Explore projects that are making a difference in your community and beyond.
+        </Text>
+        {/* Search Bar */}
+        <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-2 mb-4">
+          <Ionicons name="search" size={18} color="#6B7280" />
+          <TextInput
+            placeholder="Search..."
+            className="ml-2 flex-1 text-sm text-gray-700"
+            placeholderTextColor="#9CA3AF"
+          />
+        </View>
+
+        {/* Filter Pills */}
+        <View className="flex-row flex-wrap mb-4 gap-2">
+          {[ "All", "In your area", "In your country"].map(
+            (label, index) => (
+              <TouchableOpacity
+                key={index}
+                className={`px-4 py-2 rounded-full border ${
+                  index === 0
+                    ? "bg-emerald-100 border-kiku-light-green"
+                    : "bg-gray-100 border-gray-300"
+                }`}
+                onPress={() => {
+                  Alert.alert("Filter Selected", `You selected: ${label}`, [{text: 'Cancel',onPress: () => console.log('Cancel Pressed'),style: 'cancel'}]);
+                }}
+              >
+                <Text
+                  className={`text-sm font-medium ${
+                    index === 0 ? "text-kiku-dark-green" : "text-gray-600"
+                  }`}
+                >
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            )
+          )}
+        </View>
+
       </View>
     </ScrollView>
   );
