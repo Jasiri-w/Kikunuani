@@ -62,19 +62,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    fetchUserProfile();
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setSession(session);
+        await refreshUser(); // fetch from profiles/orgs
+      }
+      setIsLoading(false);
+    };
+
+    init();
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         console.log("User signed out");
         setUser(null);
       } else {
-        fetchUserProfile();
+        setSession(session);
+        refreshUser();
       }
     });
 
     return () => {
-      listener.subscription.unsubscribe();
+      listener?.subscription.unsubscribe();
     };
   }, []);
 

@@ -12,11 +12,7 @@ export default function Signup() {
     const { error } = await supabase.auth.signUp({ email, password });
     if (error) return console.log("Signup error", error.message);
 
-    Alert.alert("Success", "Please check your email to confirm your account.");
-    
-    setTimeout(() => {
-      router.push("/auth/login");
-    }, 1000);
+    router.push("/auth/verify");
   };
 
   const skipOnboarding = async () => {

@@ -119,7 +119,7 @@ export default function ExploreScreen() {
         </View>
 
         {/* Follow-up Section Title */}
-        <Text className="text-gray-700 font-medium text-base">Development Map</Text>
+        <Text className="text-gray-700 font-medium text-base">Projects</Text>
       </View>
     </ScrollView>
   );
