@@ -5,7 +5,7 @@ import "../global.css";
 
 import { AuthProvider } from "@/contexts/AuthContext";
 
-LogBox.ignoreAllLogs(true);
+// LogBox.ignoreAllLogs(true);
 
 export default function RootLayout() {
   return (

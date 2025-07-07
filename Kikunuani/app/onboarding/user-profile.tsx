@@ -36,6 +36,45 @@ export default function UserProfileOnboarding() {
     }
   };
 
+  const skipOnboarding = async () => {
+    const userId = user?.id;
+    if (!userId) return console.log("Error", "No user session found");
+
+    const { data: profileExists, error: checkError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (checkError) {
+      return console.log("Error", checkError.message);
+    }
+
+    if (!profileExists) {
+      const { error: insertError } = await supabase.from("profiles")
+          .insert({ 
+            id: userId,
+            email: user?.email ?? "",
+            onboarding_complete: false,
+          });
+
+      if (insertError) {
+        return console.log("Error", insertError.message);
+      }
+    } else {
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ onboarding_complete: false })
+        .eq("id", userId);
+
+      if (updateError) {
+        return console.log("Error", updateError.message);
+      }
+    }
+
+    router.replace("/explore");
+  };
+
   return (
     <View className="flex-1 justify-center items-center px-6">
       <Text className="text-sm font-medium mb-1">First Name</Text>

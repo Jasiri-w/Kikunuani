@@ -18,30 +18,59 @@ export default function OrgProfileOnboarding() {
 
     const { error: orgError } = await supabase
       .from("organizations")
-      .insert({
+      .update({
         name: orgName.trim(),
-        created_by: user?.id,
-        verified: false,
-      });
+        onboarding_complete: true,
+      })
+      .eq("id", user?.id);
 
     if (orgError) {
       console.error("Org creation failed:", orgError);
       Alert.alert("Error", "There was a problem creating your organization.");
       return;
-    }
-
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .update({ onboarding_complete: true })
-      .eq("id", user?.id);
-
-    if (profileError) {
-      console.error("Profile update failed:", profileError);
-      Alert.alert("Error", "There was a problem updating your profile.");
     } else {
       await refreshUser(); // Refresh user data to get updated profile
       router.replace("/explore");
     }
+  };
+
+  const skipOnboarding = async () => {
+    const userId = user?.id;
+    if (!userId) return console.log("Error", "No user session found");
+
+    const { data: orgExists, error: checkError } = await supabase
+      .from("organizations")
+      .select("id")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (checkError) {
+      return console.log("Error", checkError.message);
+    }
+
+    if (!orgExists) {
+      const { error: insertError } = await supabase.from("organizations")
+          .insert({ 
+            id: userId,
+            email: user?.email ?? "",
+            onboarding_complete: false,
+          });
+
+      if (insertError) {
+        return console.log("Error", insertError.message);
+      }
+    } else {
+      const { error: updateError } = await supabase
+        .from("organizations")
+        .update({ onboarding_complete: false })
+        .eq("id", userId);
+
+      if (updateError) {
+        return console.log("Error", updateError.message);
+      }
+    }
+
+    router.replace("/explore");
   };
 
   return (
@@ -67,6 +96,14 @@ export default function OrgProfileOnboarding() {
       >
         <Text className="text-white font-semibold text-center">Continue</Text>
       </TouchableOpacity>
+      
+      <TouchableOpacity
+        className="border border-gray-300 px-6 py-3 rounded-full w-full"
+        onPress={skipOnboarding}
+      >
+        <Text className="text-center text-gray-700 font-semibold">Skip Onboarding For Now</Text>
+      </TouchableOpacity>
+
     </View>
   );
 }

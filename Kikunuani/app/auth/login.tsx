@@ -2,11 +2,13 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "expo-router";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const { user, refreshUser } = useAuth();
 
   const handleLogin = async () => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -15,29 +17,30 @@ export default function Login() {
     const userId = data?.user?.id;
     const userEmail = data?.user?.email;
 
-    // Check if profile exists
-    const { data: existingProfile, error: profileCheckError } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("id", userId)
-      .single();
+    // // Check if profile exists
+    // const { data: existingProfile, error: profileCheckError } = await supabase
+    //   .from("profiles")
+    //   .select("id")
+    //   .eq("id", userId)
+    //   .single();
 
-    if (!existingProfile && userId) {
-      // Only insert if it doesn't already exist
-      const { error: insertError } = await supabase
-        .from("profiles")
-        .insert([{ id: userId, email: userEmail }]);
-
-      if (insertError) {
-        console.error("Profile creation error:", insertError.message);
-        return Alert.alert("Error", "Could not complete login. Try again.");
-      }
-    }
-
+    await refreshUser(); // Refresh user data to get updated profile
+    console.log("User logged in:", {
+      id: userId,
+      email: userEmail,
+      account_type: user?.account_type,
+      first_name: user?.first_name ?? null,
+      last_name: user?.last_name ?? null,
+      onboarding_complete: user?.onboarding_complete ?? null,
+    });
     router.replace("/"); // Proceed normally
   };
   const handleFirstTimeUser = () => {
     router.push("/auth/signup");
+  };
+
+  const skipOnboarding = async () => {
+    router.replace("/explore");
   };
 
   return (
@@ -60,8 +63,18 @@ export default function Login() {
         onChangeText={setPassword}
       />
 
+      <Text className="text-sm text-kiku-muted-green mb-4">
+        Remember to verify your email after signing up!!
+      </Text>
+
       <TouchableOpacity className="bg-kiku-dark-green py-3 rounded" onPress={handleLogin}>
         <Text className="text-white text-center font-semibold">Log In</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        className="border border-gray-300 px-6 py-3 rounded-full w-full"
+        onPress={skipOnboarding}
+      >
+        <Text className="text-center text-gray-700 font-semibold">Continue as Guest</Text>
       </TouchableOpacity>
 
       <View className="mt-6 items-center">
@@ -70,6 +83,8 @@ export default function Login() {
           <Text className="text-kiku-dark-green font-semibold underline">Create an account</Text>
         </TouchableOpacity>
       </View>
+
+      
     </View>
   );
 }

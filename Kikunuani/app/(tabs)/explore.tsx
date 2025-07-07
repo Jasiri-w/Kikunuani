@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, ScrollView, TextInput, Image, TouchableOpacity } from "react-native";
+import { Text, View, StyleSheet, ScrollView, TextInput, Image, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/utils/theme";
 import { LinearGradient } from "expo-linear-gradient";
@@ -53,6 +53,9 @@ export default function ExploreScreen() {
                     ? "bg-emerald-100 border-kiku-light-green"
                     : "bg-gray-100 border-gray-300"
                 }`}
+                onPress={() => {
+                  Alert.alert("Filter Selected", `You selected: ${label}`, [{text: 'Cancel',onPress: () => console.log('Cancel Pressed'),style: 'cancel'}]);
+                }}
               >
                 <Text
                   className={`text-sm font-medium ${

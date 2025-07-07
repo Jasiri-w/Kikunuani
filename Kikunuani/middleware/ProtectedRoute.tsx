@@ -1,12 +1,26 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
 import { View, ActivityIndicator } from "react-native";
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, refreshUser } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const hasRefreshed = useRef(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const runAuthChecks = async () => {
+      if (isLoading || hasRefreshed.current) return;
+
+      hasRefreshed.current = true;
+      await refreshUser();
+      setChecking(false);
+    };
+
+    runAuthChecks();
+  }, [isLoading]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -16,6 +30,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
       router.replace("/auth/login");
     } else if (!user.onboarding_complete) {
       // Not onboarded? Force onboarding.
+      console.log("Onboarding Incomplete | User: ", user);
       router.replace("/onboarding/account-type");
     } else if (
       pathname === "/(tabs)/index" && 
