@@ -1,15 +1,61 @@
-import { Text, View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
-import { Image } from "expo-image";
+import { Text, View, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from "react-native";
+import { Image } from "react-native";
 import ImageViewer from "@/components/imageViewer";
 import { Ionicons } from '@expo/vector-icons'
 import { colors } from "@/utils/theme";
 import { useRouter } from "expo-router";
 import ProtectedRoute from "@/middleware/ProtectedRoute";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 const router = useRouter();
 const PlaceholderImage = require("../../assets/images/background-image.jpg")
+const screenWidth = Dimensions.get("window").width;
 
 export default function Index() {
+  const [yourProjects, setYourProjects] = useState<any[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [topProjects, setTopProjects] = useState<any[]>([]);
+  const [loadingTop, setLoadingTop] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchProjects() {
+      setLoadingProjects(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.id) {
+        setYourProjects([]);
+        setLoadingProjects(false);
+        return;
+      }
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("owner", user.id)
+        .order("created_at", { ascending: false });
+      if (isMounted) {
+        setYourProjects(data || []);
+        setLoadingProjects(false);
+      }
+    }
+    fetchProjects();
+    return () => { isMounted = false; };
+  }, []);
+
+  useEffect(() => {
+    async function fetchTopProjects() {
+      setLoadingTop(true);
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(5);
+      setTopProjects(data || []);
+      setLoadingTop(false);
+    }
+    fetchTopProjects();
+  }, []);
+
   return (
     <ProtectedRoute>
       <ScrollView className="flex-1 bg-white p-4">
@@ -24,7 +70,7 @@ export default function Index() {
         <View className="rounded-xl overflow-hidden bg-white shadow-md">
           <Image
             source={{ uri: 'https://images.unsplash.com/photo-1544928147-79a2dbc1f389?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }}
-            className="w-full h-44"
+            style={{ width: screenWidth - 32, height: 176 }} // 32 = horizontal padding (p-4)
             resizeMode="cover"
           />
 
@@ -65,24 +111,47 @@ export default function Index() {
 
         <View className="mt-4 overflow-visible">
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {/* Project Card 1 */}
-            <View className="w-48 ml-2 mr-4 mb-2 bg-white rounded-xl shadow-md overflow-hidden">
-              <Image
-                source={{ uri: 'https://images.unsplash.com/flagged/photo-1574097656146-0b43b7660cb6?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }}
-                className="w-full h-28"
-                resizeMode="cover"
-              />
-              <View className="p-3">
-                <Text className="text-sm font-semibold text-gray-800">Moi School Plant</Text>
-                <View className="flex-row items-center mt-1">
-                  <Ionicons name="trending-up-outline" size={14} color={colors.kikuLightGreen}/>
-                  <Text className="ml-1 text-sm text-gray-700">Milestone Progress 90%</Text>
-                </View>
-                <TouchableOpacity onPress={() => router.push("/project/1")}>
-                  <Text className="text-xs text-kiku-muted-green font-medium mt-1">Jump back in</Text>
-                </TouchableOpacity>
+            {loadingProjects ? (
+              <View className="w-48 ml-2 mr-4 mb-2 justify-center items-center">
+                <Text className="text-gray-500">Loading...</Text>
               </View>
-            </View>
+            ) : yourProjects.length === 0 ? (
+              <View className="w-48 ml-2 mr-4 mb-2 justify-center items-center">
+                <Text className="text-gray-500">No projects yet.</Text>
+              </View>
+            ) : (
+              yourProjects.map((project) => (
+                <View
+                  key={project.id}
+                  className="w-48 ml-2 mr-4 mb-2 bg-white rounded-xl shadow-md overflow-hidden"
+                >
+                  <Image
+                    source={{
+                      uri:
+                        project.image?.trim()
+                          ? project.image
+                          : "https://images.unsplash.com/flagged/photo-1574097656146-0b43b7660cb6?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                    }}
+                    className="w-full h-28"
+                    resizeMode="cover"
+                  />
+                  <View className="p-3">
+                    <Text className="text-sm font-semibold text-gray-800" numberOfLines={1}>
+                      {project.name}
+                    </Text>
+                    <View className="flex-row items-center mt-1">
+                      <Ionicons name="trending-up-outline" size={14} color={colors.kikuLightGreen} />
+                      <Text className="ml-1 text-sm text-gray-700" numberOfLines={1}>
+                        {project.description ? project.description.slice(0, 22) + (project.description.length > 22 ? "..." : "") : "No description"}
+                      </Text>
+                    </View>
+                    <TouchableOpacity onPress={() => router.push(`/project/${project.id}`)}>
+                      <Text className="text-xs text-kiku-muted-green font-medium mt-1">Jump back in</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))
+            )}
           </ScrollView>
         </View>
 
@@ -93,40 +162,56 @@ export default function Index() {
         </Text>
 
         <View className="mt-4 overflow-visible">
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {/* Project Card 1 */}
-            <TouchableOpacity onPress={() => router.push("/project/1")} className="w-48 ml-2 mr-4 mb-2 bg-white rounded-xl shadow-md overflow-hidden">
-              <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1699720435972-421b63a6ee57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwyfHxsYXRyaW5lfGVufDB8fHx8MTcyMTc0MjUxMnww&ixlib=rb-4.0.3&q=80&w=1080' }}
-                className="w-full h-28"
-                resizeMode="cover"
-              />
-              <View className="p-3">
-                <Text className="text-sm font-semibold text-gray-800">Kikunuani Pit Latrines</Text>
-                <View className="flex-row items-center mt-1">
-                  <Ionicons name="star" size={14} color={colors.kikuLightGreen}/>
-                  <Text className="ml-1 text-sm text-gray-700">4.9 Stars</Text>
-                </View>
-                <Text className="text-xs text-kiku-muted-green font-medium mt-1">View</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="py-4">
+            {loadingTop ? (
+              <View className="w-48 ml-2 mr-4 mb-2 justify-center items-center">
+                <Text className="text-gray-500">Loading...</Text>
               </View>
-            </TouchableOpacity>
-
-            {/* Project Card 2 */}
-            <TouchableOpacity onPress={() => router.push("/project/1")}className="w-48 mr-4 mb-2 bg-white rounded-xl shadow-md overflow-hidden">
-              <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1697383904769-9a0342912c68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwzfHxzbHVtc3xlbnwwfHx8fDE3MjE3NDI4NTh8MA&ixlib=rb-4.0.3&q=80&w=1080' }}
-                className="w-full h-28"
-                resizeMode="cover"
-              />
-              <View className="p-3">
-                <Text className="text-sm font-semibold text-gray-800">Kibera Food Runs</Text>
-                <View className="flex-row items-center mt-1">
-                  <Ionicons name="star" size={14} color={colors.kikuLightGreen} />
-                  <Text className="ml-1 text-sm text-gray-700">4.7 Stars</Text>
-                </View>
-                <Text className="text-xs text-kiku-muted-green font-medium mt-1">View</Text>
-              </View>
-            </TouchableOpacity>
+            ) : (
+              <>
+                {topProjects.map((project) => (
+                  <TouchableOpacity
+                    key={project.id}
+                    onPress={() => router.push(`/project/${project.id}`)}
+                    className="w-48 ml-2 mr-4 mb-2 bg-white rounded-xl shadow-md overflow-hidden"
+                  >
+                    <Image
+                      source={{
+                        uri:
+                          project.image?.trim()
+                            ? project.image
+                            : "https://images.unsplash.com/flagged/photo-1574097656146-0b43b7660cb6?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                      }}
+                      className="w-full h-28"
+                      resizeMode="cover"
+                    />
+                    <View className="p-3">
+                      <Text className="text-sm font-semibold text-gray-800" numberOfLines={1}>
+                        {project.name}
+                      </Text>
+                      <View className="flex-row items-center mt-1">
+                        <Ionicons name="star" size={14} color={colors.kikuLightGreen} />
+                        <Text className="ml-1 text-sm text-gray-700">
+                          {project.description
+                            ? project.description.slice(0, 22) + (project.description.length > 22 ? "..." : "")
+                            : "No description"}
+                        </Text>
+                      </View>
+                      <Text className="text-xs text-kiku-muted-green font-medium mt-1">View</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+                {/* View More Arrow */}
+                <TouchableOpacity
+                  onPress={() => router.push("/explore")}
+                  className="ml-2 mr-4 mb-2 bg-white rounded-xl shadow-md justify-center items-center"
+                  style={{ alignSelf: "center", padding: 60, boxShadow: '0px 0px 15px 0px rgba(128, 204, 40, 0.8)' }}
+                >
+                  <Ionicons name="arrow-forward-circle" size={40} color={colors.kikuLightGreen} />
+                  <Text className="text-xs text-kiku-muted-green font-medium mt-2">View More</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </ScrollView>
         </View>
 
@@ -172,18 +257,30 @@ export default function Index() {
         </View>
 
       </ScrollView>
+
+      {/* Floating Action Button */}
+      <TouchableOpacity
+        onPress={() => router.push("/project/new")}
+        style={{
+          position: "absolute",
+          bottom: 32,
+          right: 24,
+          backgroundColor: colors.kikuLightGreen,
+          borderRadius: 32,
+          width: 56,
+          height: 56,
+          justifyContent: "center",
+          alignItems: "center",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+          elevation: 5,
+        }}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="add" size={32} color="#fff" />
+      </TouchableOpacity>
     </ProtectedRoute>
   );
 }
-
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-  },
-  imageContainer: {
-    flex: 1,
-  },
-
-})
