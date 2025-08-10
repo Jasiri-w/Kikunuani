@@ -1,34 +1,80 @@
 import { View, Text, Image, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ProjectDetails() {
   const { id } = useLocalSearchParams();
-  const navigation = useNavigation();
+  const router = useRouter();
+  const { user } = useAuth();
   const [project, setProject] = useState<any>(null);
+  const [membership, setMembership] = useState<"none" | "pending" | "involved" | "owner">("none");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchProject() {
+    async function fetchProjectAndMembership() {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data: projectData, error: projectError } = await supabase
         .from("projects")
         .select("*")
         .eq("id", id)
         .single();
-      if (data) {
-        setProject(data);
-        navigation.setOptions({ title: data.name });
-      } else {
-        setProject(null);
-        navigation.setOptions({ title: `Project ${id} Details` });
+      setProject(projectData);
+
+      if (user && projectData) {
+        if (projectData.owner === user.id) {
+          setMembership("owner");
+        } else {
+          const { data: membershipData } = await supabase
+            .from("project_memberships")
+            .select("*")
+            .eq("project_id", id)
+            .eq("user_id", user.id)
+            .single();
+
+          if (!membershipData) {
+            setMembership("none");
+          } else if (membershipData.role === "pending") {
+            setMembership("pending");
+          } else {
+            setMembership("involved");
+          }
+        }
       }
       setLoading(false);
     }
-    if (id) fetchProject();
-  }, [id]);
+    fetchProjectAndMembership();
+  }, [id, user]);
+
+  useEffect(() => {
+    if (membership === "pending") {
+      router.replace(`/project/${id}/pending`);
+    }
+    // Remove dashboard redirect for involved/owner
+    // Users always see the presentable version first
+  }, [membership, id, router]);
+
+  const handleGetInvolved = async () => {
+    if (!user?.id || !project?.id) return;
+    const { error } = await supabase
+      .from("project_memberships")
+      .insert({
+        project_id: project.id,
+        user_id: user.id,
+        role: "pending",
+      });
+    if (!error) {
+      router.replace(`/project/${project.id}/pending`);
+    } else {
+      console.log("Error requesting to join project:", error.message);
+    }
+  };
+
+  const handleGoToDashboard = () => {
+    router.push(`/project/${project.id}/dashboard`);
+  };
 
   if (loading) {
     return (
@@ -97,9 +143,21 @@ export default function ProjectDetails() {
 
       {/* Action Buttons */}
       <View className="mt-8 space-y-3">
-        <TouchableOpacity className="bg-kiku-light-green rounded-xl py-3">
-          <Text className="text-center font-bold text-white text-base">Get Involved</Text>
-        </TouchableOpacity>
+        {membership === "none" ? (
+          <TouchableOpacity
+            className="bg-kiku-light-green rounded-xl py-3"
+            onPress={handleGetInvolved}
+          >
+            <Text className="text-center font-bold text-white text-base">Get Involved</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            className="bg-kiku-light-green rounded-xl py-3"
+            onPress={handleGoToDashboard}
+          >
+            <Text className="text-center font-bold text-white text-base">Project Dashboard</Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity className="border border-kiku-light-green rounded-xl py-3">
           <Text className="text-center font-bold text-kiku-light-green text-base">Fund</Text>

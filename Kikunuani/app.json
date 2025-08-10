@@ -14,7 +14,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#154403"
       },
       "edgeToEdgeEnabled": true
     },
@@ -43,6 +43,12 @@
       "eas": {
         "projectId": "31932c9b-846e-4465-849c-b0d6b5c23343"
       }
+    }
+    ,"splash": {
+      "image": "./assets/images/splash-icon.png",
+      "imageWidth": 200,
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
     }
   }
 }

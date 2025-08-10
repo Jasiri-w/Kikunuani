@@ -1,8 +1,12 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../utils/theme";
+import { TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
 
 export default function TabsLayout() {
+  const router = useRouter();
+
   return (
     <Tabs
       screenOptions={{
@@ -28,7 +32,15 @@ export default function TabsLayout() {
               color={color}
               size={24}
             />
-          )
+          ),
+          headerRight: () => (
+            <TouchableOpacity
+              style={{ marginRight: 16 }}
+              onPress={() => router.push("/settings/profile-menu")}
+            >
+              <Ionicons name="person-circle-outline" size={28} color={colors.kikuDarkGreen} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Tabs.Screen 

@@ -137,7 +137,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email,
         account_type: "organization",
         first_name: org.name ?? null,
-        last_name: null,
+        last_name: org.description ?? null,
         onboarding_complete: org.onboarding_complete, // or use a new `onboarding_complete` field if you add it to orgs
       });
       console.log("User set with organization data:", {
@@ -145,7 +145,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email,
         account_type: "organization",
         first_name: org.name ?? null,
-        last_name: null,
+        last_name: org.description ?? null,
         onboarding_complete: org.onboarding_complete,
       });
       return;

@@ -1,20 +1,26 @@
 import { View, Text, TextInput, ScrollView, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useAuth } from "@/contexts/AuthContext";
 
 const router = useRouter();
 
 export default function PulseScreen() {
+  const { user } = useAuth();
+
   return (
     <ScrollView className="flex-1 bg-white px-4 pt-6">
       {/* Header Greeting */}
       <View className="flex-row items-center justify-between mb-2">
         <View className="flex-row items-center gap-2">
-          <Image
-            source={{ uri: 'https://i.pravatar.cc/100' }} // replace with actual user image
-            className="w-10 h-10 rounded-full"
+          <Ionicons
+            name="person-circle-outline"
+            size={40}
+            color="#154403"
           />
-          <Text className="text-lg font-semibold text-gray-800">Hey Manuel</Text>
+          <Text className="text-lg font-semibold text-gray-800">
+            Hey, {user?.first_name ?? "there"}
+          </Text>
         </View>
         <Ionicons name="notifications-outline" size={24} color="#4B5563" />
       </View>
@@ -49,9 +55,6 @@ export default function PulseScreen() {
                 className="w-full h-32"
                 resizeMode="cover"
               />
-              <View className="absolute top-2 left-2 bg-orange-100 px-2 py-1 rounded">
-                <Text className="text-orange-700 text-xs font-semibold">Image</Text>
-              </View>
             </View>
             <View className="p-2">
               <Text className="text-sm font-semibold text-gray-800 leading-tight">

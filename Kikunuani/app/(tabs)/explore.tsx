@@ -2,8 +2,45 @@ import { Text, View, StyleSheet, ScrollView, TextInput, Image, TouchableOpacity,
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/utils/theme";
 import { LinearGradient } from "expo-linear-gradient";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "expo-router";
 
 export default function ExploreScreen() {
+  const [featuredProjects, setFeaturedProjects] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [searchResults, setSearchResults] = useState<any[] | null>(null);
+  const [searching, setSearching] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    async function fetchFeaturedProjects() {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(2);
+      setFeaturedProjects(data || []);
+    }
+    fetchFeaturedProjects();
+  }, []);
+
+  // Search handler
+  const handleSearch = async (text: string) => {
+    setSearch(text);
+    if (text.trim().length === 0) {
+      setSearchResults(null);
+      return;
+    }
+    setSearching(true);
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*")
+      .ilike("name", `%${text}%`);
+    setSearchResults(data || []);
+    setSearching(false);
+  };
+
   return (
     <ScrollView className="h-screen bg-white">
       {/* Hero Section */}
@@ -33,51 +70,58 @@ export default function ExploreScreen() {
       {/* Main Content */}
       <View className="px-4 pt-6 pb-12">
 
-        {/* Image Cards */}
+        {/* Featured Projects */}
         <View className="flex-row justify-between mb-4">
-          <View className="w-[48%] bg-white rounded-xl shadow-sm overflow-hidden">
-            <Image
-              source={{
-                uri: "https://images.unsplash.com/photo-1569239591652-6cc3025b07fa?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-              }}
-              className="w-full h-28"
-              resizeMode="cover"
-            />
-            <View className="p-2">
-              <Text className="text-xs text-gray-500">Barry, Ontario</Text>
-              <Text className="text-sm font-semibold text-gray-800">Farm Development</Text>
-            </View>
-          </View>
-
-          <View className="w-[48%] bg-white rounded-xl shadow-sm overflow-hidden">
-            <Image
-              source={{
-                uri: "https://plus.unsplash.com/premium_photo-1664300347812-00e2b09646c5?q=80&w=1216&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-              }}
-              className="w-full h-28"
-              resizeMode="cover"
-            />
-            <View className="p-2">
-              <Text className="text-xs text-gray-500">Hamilon, Ontario</Text>
-              <Text className="text-sm font-semibold text-gray-800">Downtown Food Bank</Text>
-            </View>
-          </View>
+          {featuredProjects.length === 0 ? (
+            <>
+              <View className="w-[48%] bg-white rounded-xl shadow-sm overflow-hidden justify-center items-center">
+                <Text className="text-gray-400">No featured projects yet.</Text>
+              </View>
+              <View className="w-[48%] bg-white rounded-xl shadow-sm overflow-hidden justify-center items-center">
+                <Text className="text-gray-400">No featured projects yet.</Text>
+              </View>
+            </>
+          ) : (
+            featuredProjects.map((project, idx) => (
+              <TouchableOpacity
+                key={project.id}
+                className="w-[48%] bg-white rounded-xl shadow-sm overflow-hidden"
+                onPress={() => router.push(`/project/${project.id}`)}
+              >
+                <Image
+                  source={{
+                    uri: project.image?.trim()
+                      ? project.image
+                      : "https://images.unsplash.com/photo-1569239591652-6cc3025b07fa?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                  }}
+                  className="w-full h-28"
+                  resizeMode="cover"
+                />
+                <View className="p-2">
+                  <Text className="text-xs text-gray-500">{project.location ?? "Unknown Location"}</Text>
+                  <Text className="text-sm font-semibold text-gray-800" numberOfLines={2}>
+                    {project.name}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))
+          )}
         </View>
 
         {/* Highlight Card */}
         <View className="flex-row bg-emerald-100 border border-kiku-light-green rounded-xl overflow-hidden mb-6">
           <View className="flex-1 p-4 justify-center">
             <Text className="text-xs text-kiku-muted-green font-semibold mb-1">Top Regions</Text>
-            <Text className="text-lg font-bold text-emerald-800">South America</Text>
+            <Text className="text-lg font-bold text-emerald-800">Kenya</Text>
             <Text className="text-sm text-kiku-dark-green mt-1">
-              This region is known for its high altitude growing, fruitful environment and robust farms.
+              Kenya is renowned for its rich volcanic soils, high-altitude landscapes, and ideal climate, making it one of the most fertile and productive agricultural regions in Africa.
             </Text>
           </View>
           <Image
             source={{
-              uri: "https://images.unsplash.com/photo-1632913582790-d0ec5882095a?q=80&w=1172&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+              uri: "https://images.unsplash.com/photo-1558907530-fe311178388a?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
             }}
-            className="w-24 h-full"
+            className="w-32 h-full"
             resizeMode="cover"
           />
         </View>
@@ -94,12 +138,14 @@ export default function ExploreScreen() {
             placeholder="Search..."
             className="ml-2 flex-1 text-sm text-gray-700"
             placeholderTextColor="#9CA3AF"
+            value={search}
+            onChangeText={handleSearch}
           />
         </View>
 
         {/* Filter Pills */}
         <View className="flex-row flex-wrap mb-4 gap-2">
-          {[ "All", "In your area", "In your country"].map(
+          {["All", "In your area", "In your country"].map(
             (label, index) => (
               <TouchableOpacity
                 key={index}
@@ -109,7 +155,9 @@ export default function ExploreScreen() {
                     : "bg-gray-100 border-gray-300"
                 }`}
                 onPress={() => {
-                  Alert.alert("Filter Selected", `You selected: ${label}`, [{text: 'Cancel',onPress: () => console.log('Cancel Pressed'),style: 'cancel'}]);
+                  Alert.alert("Filter Selected", `You selected: ${label}`, [
+                    { text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel' }
+                  ]);
                 }}
               >
                 <Text
@@ -123,6 +171,45 @@ export default function ExploreScreen() {
             )
           )}
         </View>
+
+        {/* Search Results */}
+        {searchResults && (
+          <View className="mt-2">
+            {searching && (
+              <Text className="text-gray-400 mb-2">Searching...</Text>
+            )}
+            {searchResults.length === 0 ? (
+              <Text className="text-gray-400 mb-2">No projects found.</Text>
+            ) : (
+              searchResults.map((project) => (
+                <TouchableOpacity
+                  key={project.id}
+                  className="bg-white rounded-xl shadow-sm overflow-hidden mb-4"
+                  onPress={() => router.push(`/project/${project.id}`)}
+                >
+                  <Image
+                    source={{
+                      uri: project.image?.trim()
+                        ? project.image
+                        : "https://images.unsplash.com/photo-1569239591652-6cc3025b07fa?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                    }}
+                    className="w-full h-28"
+                    resizeMode="cover"
+                  />
+                  <View className="p-2">
+                    <Text className="text-xs text-gray-500">{project.location ?? "Unknown Location"}</Text>
+                    <Text className="text-sm font-semibold text-gray-800" numberOfLines={2}>
+                      {project.name}
+                    </Text>
+                    <Text className="text-xs text-gray-600 mt-1" numberOfLines={3}>
+                      {project.description ?? "No description available."}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))
+            )}
+          </View>
+        )}
 
       </View>
     </ScrollView>
