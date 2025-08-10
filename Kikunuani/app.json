@@ -14,9 +14,10 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#154403"
+        "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.jasiriw.kiku"
     },
     "web": {
       "bundler": "metro",
@@ -43,12 +44,6 @@
       "eas": {
         "projectId": "31932c9b-846e-4465-849c-b0d6b5c23343"
       }
-    }
-    ,"splash": {
-      "image": "./assets/images/splash-icon.png",
-      "imageWidth": 200,
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
     }
   }
 }
